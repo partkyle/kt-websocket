@@ -1,5 +1,6 @@
 import io.ktor.application.*
 import io.ktor.http.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.websocket.*
@@ -16,7 +17,9 @@ class App {
                 }
 
                 webSocket("/v1/rpc") {
-
+                    val msg = incoming.receive()
+                    println((msg as Frame.Text).readText())
+                    send(Frame.Text("Goodbye!"))
                 }
             }
         }

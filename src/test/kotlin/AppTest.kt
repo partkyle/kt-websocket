@@ -21,9 +21,7 @@ internal class AppTest {
     @Test
     fun `supports websocket`() {
         withTestApplication(tobj.buildModules()) {
-            handleWebSocketConversation("/v1/rpc") { _, _ ->
-
-            }
+            handleWebSocketConversation("/v1/rpc") { _, _ -> }
         }
     }
 }

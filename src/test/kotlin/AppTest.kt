@@ -17,4 +17,13 @@ internal class AppTest {
             assertEquals(HttpStatusCode.OK, response.response.status())
         }
     }
+
+    @Test
+    fun `supports websocket`() {
+        withTestApplication(tobj.buildModules()) {
+            handleWebSocketConversation("/v1/rpc") { _, _ ->
+
+            }
+        }
+    }
 }

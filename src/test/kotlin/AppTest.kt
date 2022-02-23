@@ -2,12 +2,13 @@ import io.ktor.http.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class AppTest {
     val tobj = App()
@@ -32,20 +33,25 @@ internal class AppTest {
     }
 
     @Test
-    fun `simple conversation - fails with too many`() {
+    fun `simple conversation - using a semaphore to prevent crashing from making too many requests`() {
         withTestApplication(tobj.buildModules()) {
-            val jobs = (1..10).map {
-                launch {
-                    println("starting $it")
-                    handleWebSocketConversation("/v1/rpc") { incoming, outgoing ->
-                        outgoing.send(Frame.Text("ehlo $it"))
-                        validateMessage(incoming, "Goodbye!")
+            runBlocking {
+                val s = Semaphore(100)
+                val jobs = List(100_000) {
+                    s.acquire()
+                    launch {
+                        println("starting $it")
+                        handleWebSocketConversation("/v1/rpc") { incoming, outgoing ->
+                            outgoing.send(Frame.Text("ehlo $it"))
+                            validateMessage(incoming, "Goodbye!")
+                        }
+                        s.release()
                     }
                 }
-            }
 
-            runBlocking {
                 jobs.joinAll()
+                assertTrue(jobs.all { it.isCompleted })
+                assertEquals(tobj.requestCount.get(), jobs.size)
             }
         }
 

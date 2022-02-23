@@ -22,6 +22,8 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
 }
 
